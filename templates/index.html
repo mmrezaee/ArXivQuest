@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Document Viewer with Question Box</title>
+    <title>Document Viewer with Sentence Highlighting</title>
     <style>
         body, html {
             height: 100%;
@@ -29,26 +29,25 @@
     </style>
 </head>
 <body>
-    <input type="text" id="url-input" placeholder="Enter URL here" value="https://arxiv.org/html/2404.05567v1">
-    <button id="load-button" onclick="loadContent()">Load Content</button>
+    <input type="text" id="url-input" placeholder="Enter URL here">
+    <textarea id="question-box" placeholder="Enter sentence to highlight" rows="4"></textarea>
+    <button id="load-button" onclick="loadContent()">Load Content and Highlight</button>
     <iframe id="content-frame" src="" title="Content Frame"></iframe>
-    <textarea id="question-box" placeholder="Enter your question here" rows="4"></textarea>
-    <button onclick="askQuestion()">Ask Question</button>
-
+    
     <script>
         function loadContent() {
             var url = document.getElementById('url-input').value;
+            var sentence = document.getElementById('question-box').value;
             fetch('/fetch_content', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({url: url})
+                body: JSON.stringify({url: url, sentence: sentence})
             })
             .then(response => response.json())
             .then(data => {
                 var iframe = document.getElementById('content-frame');
-                // Use srcdoc to inject HTML content directly
                 iframe.srcdoc = data.content;
             })
             .catch(error => {
@@ -56,12 +55,7 @@
                 alert('Failed to load content');
             });
         }
-
-        function askQuestion() {
-            var question = document.getElementById('question-box').value;
-            alert("You asked: " + question);
-            // Implement question handling logic here
-        }
     </script>
 </body>
 </html>
+
