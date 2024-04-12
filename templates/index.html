@@ -2,20 +2,42 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Fetch and Display HTML</title>
+    <title>Document Viewer with Question Box</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        #url-input, #question-box {
+            width: 80%;
+            margin-top: 10px;
+            display: block; /* Ensures the input and textarea take full width as set */
+            margin-left: auto;
+            margin-right: auto;
+        }
+        #load-button, button {
+            width: 20%;
+            display: block;
+            margin: 10px auto; /* Centers the button */
+        }
+        iframe {
+            width: 100%;
+            height: 60%; /* Adjust the height as needed */
+            border: none;
+        }
+    </style>
 </head>
 <body>
-    <input type="text" id="url" placeholder="Enter URL here" value="https://arxiv.org/html/2404.05567v1">
-    <button onclick="loadContent()">Load Content</button>
-    <br>
-    <textarea id="question" placeholder="Enter your question here" rows="4" cols="50"></textarea>
+    <input type="text" id="url-input" placeholder="Enter URL here" value="https://arxiv.org/html/2404.05567v1">
+    <button id="load-button" onclick="loadContent()">Load Content</button>
+    <iframe id="content-frame" src="" title="Content Frame"></iframe>
+    <textarea id="question-box" placeholder="Enter your question here" rows="4"></textarea>
     <button onclick="askQuestion()">Ask Question</button>
-    <div id="content" style="border: 1px solid black; margin-top: 20px; padding: 10px;">
-        <!-- Content will be loaded here -->
-    </div>
+
     <script>
         function loadContent() {
-            var url = document.getElementById('url').value;
+            var url = document.getElementById('url-input').value;
             fetch('/fetch_content', {
                 method: 'POST',
                 headers: {
@@ -25,12 +47,18 @@
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById('content').innerHTML = data.content;
+                var iframe = document.getElementById('content-frame');
+                // Use srcdoc to inject HTML content directly
+                iframe.srcdoc = data.content;
+            })
+            .catch(error => {
+                console.error('Error loading content:', error);
+                alert('Failed to load content');
             });
         }
 
         function askQuestion() {
-            var question = document.getElementById('question').value;
+            var question = document.getElementById('question-box').value;
             alert("You asked: " + question);
             // Implement question handling logic here
         }
