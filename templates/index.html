@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fetch and Display HTML</title>
+</head>
+<body>
+    <input type="text" id="url" placeholder="Enter URL here" value="https://arxiv.org/html/2404.05567v1">
+    <button onclick="loadContent()">Load Content</button>
+    <br>
+    <textarea id="question" placeholder="Enter your question here" rows="4" cols="50"></textarea>
+    <button onclick="askQuestion()">Ask Question</button>
+    <div id="content" style="border: 1px solid black; margin-top: 20px; padding: 10px;">
+        <!-- Content will be loaded here -->
+    </div>
+    <script>
+        function loadContent() {
+            var url = document.getElementById('url').value;
+            fetch('/fetch_content', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({url: url})
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('content').innerHTML = data.content;
+            });
+        }
+
+        function askQuestion() {
+            var question = document.getElementById('question').value;
+            alert("You asked: " + question);
+            // Implement question handling logic here
+        }
+    </script>
+</body>
+</html>
