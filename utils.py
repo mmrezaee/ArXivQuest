@@ -2,6 +2,13 @@ from nltk.tokenize import sent_tokenize
 from bs4.element import NavigableString, Tag
 
 elements_of_interest = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p','table']
+
+def correct_images_src(prefix,element):
+    for img in element.find_all('img'):
+        original_src = img['src']
+        new_src = prefix+'/'+ original_src
+        img['src'] = new_src
+
 def extract_table(table):
     headers = [th.text.strip() for th in table.find_all('th')]
     rows = []
