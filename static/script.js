@@ -3,13 +3,13 @@ let highlights = []; // Array to store references to highlighted elements
 
 function loadContent() {
     var url = document.getElementById('url-input').value;
-    var sentence = document.getElementById('question-box').value;
+    var question = document.getElementById('question-box').value;
     fetch('/fetch_content', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({url: url, sentence: sentence})
+        body: JSON.stringify({url: url, question: question})
     })
     .then(response => response.json())
     .then(data => {
