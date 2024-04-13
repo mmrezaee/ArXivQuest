@@ -37,6 +37,7 @@ def fetch_content():
     #question = None
     response = requests.get(url)
     soup = BeautifulSoup(response.content, 'html.parser')
+    #print(f'soup: {soup}')
     correct_images_src(url,soup)
     if not question:
         return jsonify({"content": str(soup)})
@@ -82,7 +83,7 @@ def fetch_content():
     #    print(f'selected_answers: {selected_answers}')
     #    replace_with_highlight(soup,selected_answers)
 
-    return jsonify({"content": str(soup)})
+    return jsonify({"content": str(soup), "answers": selected_answers})
 
 if __name__ == '__main__':
     app.run(debug=True)

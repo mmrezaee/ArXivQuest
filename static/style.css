@@ -1,0 +1,29 @@
+body, html {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+#top-container {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px;
+}
+#question-container, #answers-container {
+    width: 48%; /* Adjust width for padding and margins */
+    padding: 10px;
+    border: 1px solid #ccc; /* Added for visibility */
+}
+#question-box {
+    width: 100%;
+    resize: none; /* Prevent resizing */
+}
+button {
+    display: block;
+    width: 100%; /* Adjusted for better accessibility */
+    margin: 10px 0; /* Only vertical margin */
+}
+iframe {
+    width: 100%;
+    height: 60%;
+    border: none;
+}

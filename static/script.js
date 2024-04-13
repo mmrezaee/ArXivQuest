@@ -1,9 +1,14 @@
-let currentHighlight = 0; // Index of the current highlighted element
-let highlights = []; // Array to store references to highlighted elements
-
 function loadContent() {
-    var url = document.getElementById('url-input').value;
-    var question = document.getElementById('question-box').value;
+    var url = 'https://arxiv.org/html/2404.05567v1';  // Hard-coded URL
+    var questionBox = document.getElementById('question-box');
+
+    if (!questionBox) {
+        console.error("Question box element is not found!");
+        return;
+    }
+
+    var question = questionBox.value;
+
     fetch('/fetch_content', {
         method: 'POST',
         headers: {
@@ -15,7 +20,7 @@ function loadContent() {
     .then(data => {
         var iframe = document.getElementById('content-frame');
         iframe.srcdoc = data.content;
-
+        console.log("Content loaded successfully.");
         // Wait for iframe to load then initialize highlights
         iframe.onload = () => initializeHighlights(iframe);
     })
@@ -24,11 +29,8 @@ function loadContent() {
         alert('Failed to load content');
     });
 }
-
-function initializeHighlights(iframe) {
-    highlights = Array.from(iframe.contentWindow.document.querySelectorAll('span[style*="background-color: yellow;"]'));
-    currentHighlight = 0; // Reset index
-}
+let currentHighlight = 0; // Index of the current highlighted element
+let highlights = []; // Array to store references to highlighted elements
 
 function navigateHighlight(direction) {
     if (highlights.length === 0) {
@@ -49,3 +51,8 @@ function navigateHighlight(direction) {
     highlights[currentHighlight].scrollIntoView({behavior: "smooth", block: "center"});
 }
 
+// Initialization function to find all highlighted elements
+function initializeHighlights(iframe) {
+    highlights = Array.from(iframe.contentWindow.document.querySelectorAll('span[style*="background-color: yellow;"]'));
+    currentHighlight = 0; // Reset index to start from the first highlight
+}
