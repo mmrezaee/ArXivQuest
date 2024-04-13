@@ -5,8 +5,10 @@ from bs4 import BeautifulSoup, NavigableString, Tag
 from flask_cors import CORS
 from nltk.tokenize import sent_tokenize
 from utils import correct_images_src,extract_content, extract_table
+from nltk.tokenize import sent_tokenize
 from llm_qa import find_answer
 import json
+from fuzzywuzzy import fuzz
 
 app = Flask(__name__)
 CORS(app)
@@ -16,14 +18,34 @@ CORS(app)
 def home():
     return render_template('index.html')
 
-def replace_with_highlight(element,candid):
-    if isinstance(element, NavigableString) and candid in element:
-        modified_text = element.replace(candid, f'<span style="background-color: yellow;">{candid}</span>')
-        new_soup = BeautifulSoup(modified_text, 'html.parser')
-        element.replace_with(new_soup)
+debug_candid = 'first, some biases and pressures seem to be present naturally, or universally, among different learning systems, including deep learning agents.'
+
+def replace_with_highlight(element, candid, similarity_threshold=80):
+    if isinstance(element, NavigableString):
+        # Check similarity between the candidate text and the element'stext
+        element_clean = element.text.strip().lower()
+        element_senteces = sent_tokenize(element_clean)
+        #if candid == debug_candid:
+        #    print(f'str(element): {str(element).lower()}, ratio: {fuzz.ratio(candid, str(element))}')
+        ##    print(f'element_senteces: {element_senteces}')
+        #    print('+'*50)
+#
+        for sentence in element_senteces:
+            if fuzz.ratio(candid, sentence) > similarity_threshold:
+                # Highlight the whole text block since it's similar to the candidate
+                #modified_text = f'<span style="background-color: yellow;">{str(sentence)}</span>'
+
+                print(f'sentence: {sentence}')
+                modified_text = str(element).lower().replace(sentence, f'<span style="background-color: yellow;">{sentence}</span>')
+                print(f'modified_text: {modified_text}')
+                print('*'*50)
+                new_soup = BeautifulSoup(modified_text, 'html.parser')
+                element.replace_with(new_soup)
+
     elif isinstance(element, Tag):
+        # Recursively apply this function to all contents of a tag if it's not a string
         for content in element.contents:
-            replace_with_highlight(content,candid)
+            replace_with_highlight(content, candid, similarity_threshold)
 
 
 # Route to fetch content from a URL and highlight the specified sentence

@@ -10,21 +10,21 @@ def correct_images_src(prefix,element):
         img['src'] = new_src
 
 def extract_table(table):
-    headers = [th.text.strip() for th in table.find_all('th')]
+    headers = [th.text.strip().lower() for th in table.find_all('th')]
     rows = []
     for tr in table.find_all('tr'):
-        cells = [td.text.strip() for td in tr.find_all(['td', 'th'])]
+        cells = [td.text.strip().lower() for td in tr.find_all(['td', 'th'])]
         rows.append(cells)
     return '\n'.join([' | '.join(headers)] + [' | '.join(row) for row in rows])
 
 def extract_content(element):
     if isinstance(element, NavigableString):
-        return str(element).strip()
+        return str(element).lower().strip()
     elif isinstance(element, Tag):
         if element.name == 'table':
             return extract_table(element)
         elif element.name in elements_of_interest:
-            text_strip = element.text.strip()
+            text_strip = element.text.strip().lower()
             text_tokenize = sent_tokenize(text_strip)
             return '<sent>'.join(text_tokenize)
         else:

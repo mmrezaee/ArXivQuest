@@ -1,4 +1,8 @@
 debug/
+.DS_Store
 debug.py
+__pycache__/
 files/
+logs/
+sample_html.py
 log.txt
