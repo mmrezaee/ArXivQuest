@@ -30,9 +30,10 @@ def replace_with_highlight(element,candid):
 @app.route('/fetch_content', methods=['POST'])
 def fetch_content():
     data = request.get_json()
-    #url = data['url']
+    url = data['url']
+    print(f'url: {url}')
     question = data.get('question', '')
-    url = 'https://arxiv.org/html/2404.05567v1'
+    #url = 'https://arxiv.org/html/2404.05567v1'
     #question = 'what does Subfigure (a) show?'
     #question = None
     response = requests.get(url)
@@ -65,8 +66,9 @@ def fetch_content():
     seen = set()
     #counter = 1
     for item in results:
-        if item['text'] not in seen and len(item)>1:
+        if item['text'] not in seen and len(item['text'])>1:
             #selected_answers.append(' '.join([str(counter),'- ',item['text'],'score: '+str(item['score']),'\n']))
+            seen.add(item['text'])
             selected_answers.append((item['text'],item['score']))
             #highlight_sentences.append(item['text'])
             #counter +=1 

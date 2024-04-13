@@ -1,14 +1,15 @@
 function loadContent() {
-    var url = 'https://arxiv.org/html/2404.05567v1';  // Hard-coded URL
+    var urlInput = document.getElementById('url-box');
     var questionBox = document.getElementById('question-box');
     var answersContainer = document.getElementById('answers-container');  // Get the answers container
 
-    if (!questionBox) {
+    if (!urlInput || !questionBox) {
         console.error("Question box element is not found!");
         return;
     }
 
     var question = questionBox.value;
+    var url = urlInput.value;
 
     fetch('/fetch_content', {
         method: 'POST',
@@ -28,12 +29,7 @@ function loadContent() {
 
         // Update answers container with selected answers
         if (data.answers && data.answers.length > 0) {
-            answersContainer.innerHTML = '';  // Clear previous answers
-            data.answers.forEach(answer => {
-                var answerElement = document.createElement('div');
-                answerElement.textContent = answer;
-                answersContainer.appendChild(answerElement);
-            });
+            updateAnswersContainer(data.answers, answersContainer);
         } else {
             answersContainer.innerHTML = 'No answers found';  // Display no answers message
         }
@@ -41,6 +37,24 @@ function loadContent() {
     .catch(error => {
         console.error('Error loading content:', error);
         alert('Failed to load content');
+    });
+}
+
+function updateAnswersContainer(answers, container) {
+    container.innerHTML = '';  // Clear previous answers
+    answers.forEach(answer => {
+        var answerElement = document.createElement('div');
+        let words = answer.split(' ');
+        if (words.length > 0) {
+            let firstWordSpan = document.createElement('span');
+            firstWordSpan.style.fontWeight = 'bold';
+            firstWordSpan.textContent = words[0] + ' ';
+            answerElement.appendChild(firstWordSpan);
+            answerElement.appendChild(document.createTextNode(words.slice(1).join(' ')));
+        } else {
+            answerElement.textContent = answer;
+        }
+        container.appendChild(answerElement);
     });
 }
 let currentHighlight = 0; // Index of the current highlighted element
