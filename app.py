@@ -25,29 +25,16 @@ def replace_with_highlight(element,candid):
         for content in element.contents:
             replace_with_highlight(content,candid)
 
-def new_replace_with_highlight(element,question_answers):
-    #if isinstance(element, NavigableString) and answer in element:
-    if isinstance(element, NavigableString):
-        for answer in question_answers:
-            #print(f'answer: {json.dumps(answero,indent=4)}')
-            #answer_text = answer_info['text']
-            if answer in element:
-                modified_text = element.replace(answer, f'<span style="background-color: yellow;">{answer}</span>')
-                new_soup = BeautifulSoup(modified_text, 'html.parser')
-                element.replace_with(new_soup)
-    elif isinstance(element, Tag):
-        for content in element.contents:
-            replace_with_highlight(content,question_answers)
 
 # Route to fetch content from a URL and highlight the specified sentence
 @app.route('/fetch_content', methods=['POST'])
 def fetch_content():
     data = request.get_json()
     #url = data['url']
-    #question = data.get('question', '')
+    question = data.get('question', '')
     url = 'https://arxiv.org/html/2404.05567v1'
     #question = 'what does Subfigure (a) show?'
-    question = None
+    #question = None
     response = requests.get(url)
     soup = BeautifulSoup(response.content, 'html.parser')
     correct_images_src(url,soup)
@@ -64,15 +51,16 @@ def fetch_content():
     samples = doc_texts_list[:10]
     for sample in samples:
         print(sample)
-    logs_dict = find_answer(doc_texts_list,
-                          question,
-                          doc_name,
-                          write_log=False)
+    logs_dict = find_answer(doc_texts_list, 
+                            question,
+                            doc_name,
+                            use_cache = True,
+                            write_log = False)
 
     #print(f'logs_dict is {logs_dict}')
     results = logs_dict[0]['results']
-    selected_answers = [item['text'] for item in results if len(item)>1]
-    selected_answers = selected_answers[:3]
+    selected_answers = set([item['text'] for item in results if len(item)>1])
+    selected_answers = list(selected_answers)
     for candid in selected_answers: 
         print(f'candid: {candid}')
         try: 

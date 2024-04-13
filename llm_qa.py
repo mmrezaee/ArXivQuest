@@ -5,6 +5,7 @@ from collections import defaultdict
 import pandas as pd
 from sentence_transformers import SentenceTransformer
 from pymilvus import Collection, CollectionSchema, FieldSchema, DataType, connections, utility
+import numpy as np
 
 import json
 import argparse
@@ -12,6 +13,7 @@ from collections import defaultdict
 import pandas as pd
 from sentence_transformers import SentenceTransformer
 from pymilvus import Collection, CollectionSchema, FieldSchema, DataType, connections, utility
+from numpy import save
 
 def connect_to_milvus():
     """Connect to the Milvus server and create a collection for storing document embeddings."""
@@ -47,7 +49,8 @@ def search_similar_texts(collection,
                          question_embedding,
                          doc_texts,
                          id_to_index_mapping,
-                         doc_question,
+                         doc_question, 
+                         use_cache,
                          write_log = False,
                          top_k=10,
                          index_type="IVF_FLAT",
@@ -110,6 +113,7 @@ def search_similar_texts(collection,
 def find_answer(doc_texts_list,
                 question,
                 doc_name,
+                use_cache = True,
                 write_log=False,
                 top_k=10,
                 index_type='IVF_FLAT',
@@ -117,22 +121,38 @@ def find_answer(doc_texts_list,
                 search_params=None):
     """Main function to process the document and questions."""
     collection = connect_to_milvus()
-    model = SentenceTransformer('all-MiniLM-L6-v2')
-    text_embeddings = encode_text(model, doc_texts_list, 'sentences')
-    mr = collection.insert([text_embeddings.tolist()])
-    id_to_index_mapping = {id: index for index, id in enumerate(mr.primary_keys)}
-    question_embedding = encode_text(model, question, 'question')
-    # Construct the configuration string and output file path
-    config_str = f"{index_type}_{metric_type}_top{top_k}_params{str(search_params).replace(' ', '').replace(':', '')}"
+    config_str = f"{doc_name}_{index_type}_{metric_type}_top{top_k}_params{str(search_params).replace(' ', '').replace(':', '')}"
     output_folder = os.path.join("logs", config_str)
     os.makedirs(output_folder, exist_ok=True)
     output_file_path = os.path.join(output_folder, f"{doc_name}_{config_str}.json")
+    output_tensors_path = os.path.join(os.getcwd(),output_folder, f"{doc_name}_{config_str}.npy")
+    model = SentenceTransformer('all-MiniLM-L6-v2')
+    print(f'use_cache: {use_cache}')
+
+    print(f'{output_tensors_path} exists: {os.path.exists(output_tensors_path)}')
+    if not use_cache or not os.path.exists(output_tensors_path):
+        text_embeddings = encode_text(model, doc_texts_list, 'sentences')
+        text_embeddings_npy = text_embeddings.cpu().numpy()
+        text_embeddings_list = text_embeddings.tolist()
+        print(f'text_embeddings: {text_embeddings}, type: {type(text_embeddings)}')
+        print(f'**** saving embeddings to {output_tensors_path} *****')
+        save(output_tensors_path,text_embeddings_npy)
+        #mr = collection.insert([text_embeddings.tolist()])
+    else:
+        print('loading from {output_tensors_path}')
+        text_embeddings_npy = np.load(output_tensors_path)
+        text_embeddings_list = text_embeddings_npy.tolist()
+    mr = collection.insert([text_embeddings_list])
+    id_to_index_mapping = {id: index for index, id in enumerate(mr.primary_keys)}
+    question_embedding = encode_text(model, question, 'question')
+    # Construct the configuration string and output file path
     # Pass the output file path to the search_similar_texts function
     results_list= search_similar_texts(collection,
                                        question_embedding,
                                        doc_texts_list,
                                        id_to_index_mapping,
                                        question,
+                                       use_cache,
                                        write_log,
                                        top_k,
                                        index_type,
