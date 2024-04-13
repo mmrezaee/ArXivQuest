@@ -1,6 +1,7 @@
 function loadContent() {
     var url = 'https://arxiv.org/html/2404.05567v1';  // Hard-coded URL
     var questionBox = document.getElementById('question-box');
+    var answersContainer = document.getElementById('answers-container');  // Get the answers container
 
     if (!questionBox) {
         console.error("Question box element is not found!");
@@ -21,8 +22,21 @@ function loadContent() {
         var iframe = document.getElementById('content-frame');
         iframe.srcdoc = data.content;
         console.log("Content loaded successfully.");
+
         // Wait for iframe to load then initialize highlights
         iframe.onload = () => initializeHighlights(iframe);
+
+        // Update answers container with selected answers
+        if (data.answers && data.answers.length > 0) {
+            answersContainer.innerHTML = '';  // Clear previous answers
+            data.answers.forEach(answer => {
+                var answerElement = document.createElement('div');
+                answerElement.textContent = answer;
+                answersContainer.appendChild(answerElement);
+            });
+        } else {
+            answersContainer.innerHTML = 'No answers found';  // Display no answers message
+        }
     })
     .catch(error => {
         console.error('Error loading content:', error);

@@ -60,9 +60,21 @@ def fetch_content():
 
     #print(f'logs_dict is {logs_dict}')
     results = logs_dict[0]['results']
-    selected_answers = set([item['text'] for item in results if len(item)>1])
-    selected_answers = list(selected_answers)
-    for candid in selected_answers: 
+    selected_answers = []
+    highlight_sentences = []
+    seen = set()
+    #counter = 1
+    for item in results:
+        if item['text'] not in seen and len(item)>1:
+            #selected_answers.append(' '.join([str(counter),'- ',item['text'],'score: '+str(item['score']),'\n']))
+            selected_answers.append((item['text'],item['score']))
+            #highlight_sentences.append(item['text'])
+            #counter +=1 
+    #selected_answers = set([item['text'] for item in results if len(item)>1])
+    #selected_answers = list(selected_answers)
+    selected_answers.sort(key=lambda x: x[1])
+    highlight_sentences = [item[0] for item in selected_answers]
+    for candid in highlight_sentences: 
         print(f'candid: {candid}')
         try: 
             print(f'replacing with {candid}')
@@ -83,7 +95,9 @@ def fetch_content():
     #    print(f'selected_answers: {selected_answers}')
     #    replace_with_highlight(soup,selected_answers)
 
-    return jsonify({"content": str(soup), "answers": selected_answers})
+    #box_answers = [str(counter+1)+'- '+item[0]+' score: '+str(item[1]) for counter,item in enumerate(selected_answers)]
+    box_answers = [str(counter//2+1)+'- '+selected_answers[counter//2][0]+' score: '+str(selected_answers[counter//2][1]) if counter%2==0 else " " for counter in range(2*len(selected_answers))]
+    return jsonify({"content": str(soup), "answers": box_answers})
 
 if __name__ == '__main__':
     app.run(debug=True)
