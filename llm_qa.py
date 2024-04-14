@@ -6,7 +6,7 @@ import pandas as pd
 from sentence_transformers import SentenceTransformer
 from pymilvus import Collection, CollectionSchema, FieldSchema, DataType, connections, utility
 import numpy as np
-
+from utils import MODEL_EMBEDDING_DIMENSIONS
 import json
 import argparse
 from collections import defaultdict
@@ -15,12 +15,12 @@ from sentence_transformers import SentenceTransformer
 from pymilvus import Collection, CollectionSchema, FieldSchema, DataType, connections, utility
 from numpy import save
 
-def connect_to_milvus():
+def connect_to_milvus(embed_dim):
     """Connect to the Milvus server and create a collection for storing document embeddings."""
     connections.connect()
     fields = [
         FieldSchema(name="id", dtype=DataType.INT64, is_primary=True, auto_id=True),
-        FieldSchema(name="text_vector", dtype=DataType.FLOAT_VECTOR, dim=384)
+        FieldSchema(name="text_vector", dtype=DataType.FLOAT_VECTOR, dim=embed_dim)
     ]
     schema = CollectionSchema(fields, description="Document Collection")
     collection_name = "document_collection"
@@ -113,6 +113,7 @@ def search_similar_texts(collection,
 def find_answer(doc_texts_list,
                 question,
                 doc_name,
+                model_name ='all-MiniLM-L6-v2',
                 use_cache = True,
                 write_log=False,
                 top_k=10,
@@ -120,15 +121,17 @@ def find_answer(doc_texts_list,
                 metric_type='L2',
                 search_params=None):
     """Main function to process the document and questions."""
-    collection = connect_to_milvus()
-    config_str = f"{doc_name}_{index_type}_{metric_type}_top{top_k}_params{str(search_params).replace(' ', '').replace(':', '')}"
+    print(f'find_answer model_name: {model_name}')
+    embed_dim = MODEL_EMBEDDING_DIMENSIONS[model_name]
+    collection = connect_to_milvus(embed_dim)
+    config_str = f"{doc_name}_{index_type}_{metric_type}_params{str(search_params).replace(' ', '').replace(':', '')}"
     output_folder = os.path.join("logs", config_str)
     os.makedirs(output_folder, exist_ok=True)
-    output_file_path = os.path.join(output_folder, f"{doc_name}_{config_str}.json")
-    output_tensors_path = os.path.join(os.getcwd(),output_folder, f"{doc_name}_{config_str}.npy")
-    model = SentenceTransformer('all-MiniLM-L6-v2')
+    output_file_path = os.path.join(output_folder, f"{doc_name}_{model_name}_{config_str}.json")
+    output_tensors_path = os.path.join(os.getcwd(),output_folder, f"{doc_name}_{model_name}_{config_str}.npy")
+    print(f'loading the {model_name}')
+    model = SentenceTransformer(model_name)
     print(f'use_cache: {use_cache}')
-
     print(f'{output_tensors_path} exists: {os.path.exists(output_tensors_path)}')
     if not use_cache or not os.path.exists(output_tensors_path):
         text_embeddings = encode_text(model, doc_texts_list, 'sentences')

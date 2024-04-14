@@ -1,4 +1,3 @@
-
 from flask import Flask, request, jsonify, render_template
 import requests
 from bs4 import BeautifulSoup, NavigableString, Tag
@@ -19,6 +18,21 @@ def home():
     return render_template('index.html')
 
 debug_candid = 'first, some biases and pressures seem to be present naturally, or universally, among different learning systems, including deep learning agents.'
+def debug_writing_tables(doc_name):
+    from utils import all_tables
+    #print(f'all_tables: {all_tables}')
+    with open('./{doc_name}_temp_tables.txt','w') as file:
+        for index,table in enumerate(all_tables):
+            table_index = index+1
+            file.write('\n')
+            file.write('\n')
+            file.write(f'index is {table_index}: ')
+            file.write('\n')
+            file.write(table)
+            file.write('\n')
+            file.write('*'*50)
+            print(table)
+            print('*'*50)
 
 def replace_with_highlight(element, candid, similarity_threshold=80):
     if isinstance(element, NavigableString):
@@ -35,10 +49,10 @@ def replace_with_highlight(element, candid, similarity_threshold=80):
                 # Highlight the whole text block since it's similar to the candidate
                 #modified_text = f'<span style="background-color: yellow;">{str(sentence)}</span>'
 
-                print(f'sentence: {sentence}')
+                #print(f'sentence: {sentence}')
                 modified_text = str(element).lower().replace(sentence, f'<span style="background-color: yellow;">{sentence}</span>')
-                print(f'modified_text: {modified_text}')
-                print('*'*50)
+                #print(f'modified_text: {modified_text}')
+                #print('*'*50)
                 new_soup = BeautifulSoup(modified_text, 'html.parser')
                 element.replace_with(new_soup)
 
@@ -53,8 +67,19 @@ def replace_with_highlight(element, candid, similarity_threshold=80):
 def fetch_content():
     data = request.get_json()
     url = data['url']
-    print(f'url: {url}')
     question = data.get('question', '')
+    index_type = data.get('index_type', '')
+    metric_type = data.get('metric_type', '')
+    top_k = int(data.get('top_k', 10))
+    #llm_model = 'all-mpnet-base-v2'
+    model_name = data.get('model_name', ' ')
+
+    print(f'url: {url}')
+    print(f'model_name: {model_name}')
+    print(f'question: {question}')
+    print(f'index_type: {index_type}')
+    print(f'metric_type: {metric_type}')
+    print(f'top_k: {top_k}')
     #url = 'https://arxiv.org/html/2404.05567v1'
     #question = 'what does Subfigure (a) show?'
     #question = None
@@ -66,7 +91,11 @@ def fetch_content():
         return jsonify({"content": str(soup)})
     doc_name = url.split('/')[-1]
     content = extract_content(soup.find('body'))
+    #print(f'content: {content}')
     doc_texts_list = content.split('<sent>')
+    #print(f'doc_texts_list: {doc_texts_list}')
+    #debug_writing_tables(doc_name)
+    #exit()
     print(f'url: {url}')
     print(f'gathering content from {url}')
     print(f'question: {question}')
@@ -78,6 +107,10 @@ def fetch_content():
     logs_dict = find_answer(doc_texts_list, 
                             question,
                             doc_name,
+                            model_name=model_name,
+                            top_k = top_k,
+                            index_type = index_type,
+                            metric_type = metric_type,
                             use_cache = True,
                             write_log = False)
 

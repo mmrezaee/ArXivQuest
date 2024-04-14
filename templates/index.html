@@ -9,18 +9,42 @@
 <body>
     <div id="top-container">
         <div id="question-container">
-            <input type="text" id="url-box" value="https://arxiv.org/html/2403.14427v1" placeholder="Enter URL here" style="width: 100%; margin-bottom: 10px;">
-            <textarea id="question-box" placeholder="Enter sentence to highlight" rows="4"></textarea>
-            <button id="load-button" onclick="loadContent()">Load Content and Highlight</button>
+            <textarea id="url-box" placeholder="Enter URL here" rows="1"></textarea>
+            <textarea id="question-box" placeholder="Enter your question here" rows="4"></textarea>
+            <div class="controls-container">
+                <label for="top-k-box">Top K:</label>
+                <input id="top-k-box" type="number" placeholder="Enter number" min="1">
+                <label for="model-names">Model:</label>
+                <select id="model-names">
+                    <option value="all-MiniLM-L6-v2">all-MiniLM-L6-v2</option>
+                    <option value="all-MiniLM-L12-v2">all-MiniLM-L12-v2</option>
+                    <option value="all-distilroberta-v1">all-distilroberta-v1</option>
+                    <option value="all-mpnet-base-v2">all-mpnet-base-v2</option>
+                </select>
+                <label for="index-types">Index Type:</label>
+                <select id="index-types">
+                    <option value="IVF_FLAT">IVF_FLAT</option>
+                    <option value="IVF_SQ8">IVF_SQ8</option>
+                </select>
+                <label for="metric-types">Metric Type:</label>
+                <select id="metric-types">
+                    <option value="L2">L2</option>
+                    <option value="IP">IP</option>
+                </select>
+            </div>
+            <div id="button-container">
+            <button id="load-button" onclick="loadContent()">Load Content (and Question)</button>
+            <button id="next-button" onclick="navigateHighlight(1)">Next Highlight</button>
+            <button id="prev-button" onclick="navigateHighlight(-1)">Previous Highlight</button>
+            </div>
         </div>
         <div id="answers-container">
             <!-- Selected answers will be displayed here -->
         </div>
     </div>
-    <button id="next-button" onclick="navigateHighlight(1)">Next Highlight</button>
-    <button id="prev-button" onclick="navigateHighlight(-1)">Previous Highlight</button>
     <iframe id="content-frame" src="" title="Content Frame"></iframe>
 
     <script src="/static/script.js"></script>
 </body>
 </html>
+

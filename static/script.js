@@ -1,22 +1,47 @@
 function loadContent() {
     var urlInput = document.getElementById('url-box');
     var questionBox = document.getElementById('question-box');
-    var answersContainer = document.getElementById('answers-container');  // Get the answers container
+    var answersContainer = document.getElementById('answers-container'); 
 
-    if (!urlInput || !questionBox) {
-        console.error("Question box element is not found!");
-        return;
-    }
+    var topKBox = document.getElementById('top-k-box');
+    var indexTypesContainer = document.getElementById('index-types'); 
+    var metricTypesContainer = document.getElementById('metric-types'); 
+    var modelTypesContainer = document.getElementById('model-names'); 
+
+    //if (!urlInput || !questionBox) {
+    //    console.error("Question box element is not found!");
+    //    return;
+   // }
 
     var question = questionBox.value;
     var url = urlInput.value;
+    var top_k = topKBox.value;
+    var metric_type = metricTypesContainer.value;
+    var index_type = indexTypesContainer.value;
+    var model_name = modelTypesContainer.value;
+
+    // Construct the data object
+    const data = {
+        url: url,
+        question: question,
+        metric_type: metric_type,
+        index_type: index_type,
+        top_k: top_k,
+        model_name: model_name
+    };
+
+    //console.log(url);
+    //console.log(top_k);
+    //console.log(metric_type);
+    //console.log(index_type);
 
     fetch('/fetch_content', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({url: url, question: question})
+        body: JSON.stringify(data)
+        //body: JSON.stringify({url: url, question: question, metric_type: metric_type, index_type: index_type, top_k: top_k, model_name: model_name})
     })
     .then(response => response.json())
     .then(data => {

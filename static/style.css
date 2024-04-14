@@ -8,22 +8,34 @@ body, html {
     justify-content: space-between;
     margin: 10px;
 }
+#url-container {
+    width: 30%; /* Adjust this value as needed */
+    padding: 10px;
+}
 #question-container, #answers-container {
     width: 48%; /* Adjust width for padding and margins */
-    padding: 10px;
-    border: 1px solid #ccc; /* Added for visibility */
+    padding: 15px;
+    border: 0.5px solid #ccc; /* Added for visibility */
 }
 #question-box {
     width: 100%;
     resize: none; /* Prevent resizing */
 }
-button {
-    display: block;
-    width: 100%; /* Adjusted for better accessibility */
-    margin: 10px 0; /* Only vertical margin */
-}
 iframe {
     width: 100%;
     height: 60%;
     border: none;
+}
+#button-container {
+    display: flex;
+    justify-content: center; /* Center buttons horizontally */
+    align-items: center; /* Center buttons vertically */
+    margin-top: 10px; /* Increase top margin for more vertical space */
+    padding: 10px 0; /* Add padding to give some space around the buttons */
+}
+
+#button-container button {
+    flex-grow: 0.1; /* Allows each button to grow and fill the space */
+    margin: 0 10px; /* Adds horizontal space between buttons */
+    padding: 10px 20px; /* More padding for better button sizing */
 }
