@@ -20,6 +20,19 @@ def home():
     """Serve the index.html as the home page."""
     return render_template('index.html')
 
+def correct_paper_address(url):
+    """
+    Corrects the paper URL if it is not in HTML format.
+    This function supports URL formats from the 'abs', 'html', and 'pdf' pages of arXiv.
+    It ensures the URL points to the HTML version of the document.
+    """
+    page_type = url.split('arxiv.org/')[1].split('/')[0]
+    if page_type != 'html': 
+        url = url.replace('.pdf','').replace('abs','html').replace('pdf','html')
+        url += 'v1'
+    return url
+
+
 def replace_with_highlight(element, candid, similarity_threshold=80):
     """Highlight text within the element that matches the candidate text, based on a similarity threshold."""
     if isinstance(element, NavigableString):
@@ -46,6 +59,9 @@ def fetch_content():
     # Extract details from the request
     data = request.get_json()
     url = data['url']
+    print(f'input url: {url}')
+    url = correct_paper_address(url)
+    print(f'correct url: {url}')
     question = data.get('question', '')
     index_type = data.get('index_type', '')
     metric_type = data.get('metric_type', '')
