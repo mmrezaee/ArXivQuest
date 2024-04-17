@@ -1,4 +1,4 @@
-# Ask Questions From ArXiv Papers!
+# ArXivQuest: Ask Questions From ArXiv Papers!
 
 ArXiv now offers an HTML version of (recent) papers. This project provides a web-based interface that allows users to load, view, and interactively query these HTML documents. It uses Milvus to retrieve and highlight document sections relevant to the user's queries and automatically scrolls to these highlights.
 
