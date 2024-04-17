@@ -61,7 +61,7 @@ def create_and_load_index(collection,
     index_params = {
         "metric_type": metric_type,
         "index_type": index_type,
-        "params": {"nlist": 128}
+        "params": {"nlist": 10}
     }
     collection.create_index(field_name="text_vector", index_params=index_params)
     collection.load()
